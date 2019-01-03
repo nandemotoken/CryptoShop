@@ -1,0 +1,211 @@
+
+・ConohaVPSの登録
+参照：https://www.conoha.jp/guide/study-02.php
+　　　このへんを参考に登録しましょう。
+
+・ログインしてCentOSのセットアップをします。
+参照：https://www.conoha.jp/guide/study-03.php
+　　　https://www.conoha.jp/guide/study-04.php
+
+・Webサイト作成用ディレクトリ作成
+mkdir CriptoShop
+cd CriptoShop
+
+・bottle.pyインストール
+wget https://raw.githubusercontent.com/bottlepy/bottle/master/bottle.py
+参照：https://qiita.com/Gen6/items/949babb51d0cc000dcfb
+
+・bottleの使い方を知る
+https://www.amazon.co.jp/1%E6%97%A5%E3%81%A7%E7%90%86%E8%A7%A3%E3%81%99%E3%82%8Bbottle%E3%81%AE%E4%BD%BF%E3%81%84%E6%96%B9-bottle%E8%B6%85%E5%9F%BA%E7%A4%8E%E5%85%A5%E9%96%80-bottle-v0-13-%E6%B7%B5%E4%B8%8A-%E5%96%9C%E5%BC%98-ebook/dp/B01MQU38Y0/ref=sr_1_1?ie=UTF8&qid=1546158518&sr=8-1&keywords=bottle+python
+
+
+・firewalldを切る (実験用サイトのためセキュリティ機能は無効にします)
+systemctl stop firewalld
+systemctl disable firewalld
+
+
+・ipアドレスの確認
+ip addr show eth0
+出力
+2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
+    link/ether 02:01:96:5f:b1:d5 brd ff:ff:ff:ff:ff:ff
+    inet 150.95.177.213/23 brd 150.95.177.255 scope global noprefixroute dynamic eth0
+　　　　 ↑★IPアドレス
+
+・index.pyの作成
+vim index.py
+-------記載内容ここから-------------
+#!/user/bin/env python
+# -*- coding: utf-8 -*-
+from bottle import route , run
+@route('/')
+def page1():
+  return "Bottle Working"
+run(host='150.95.177.213' , port=8080 , debug=True)
+-------記載内容ここまで-------------
+※host=の後ろは自分のVPSのIPアドレスにしましょう。私の環境では150.95.177.213でした。
+
+・index.pyの実行
+python index.py
+
+・webブラウザでアクセス
+http://150.95.177.213:8080/
+※150.95.177.213は自分のVPSのIPアドレスにしましょう。私の環境では150.95.177.213でした。
+Bottle Workingと出力されればここまではOKです。
+
+・pycoin(ver 0.80)のインストール
+yum -y install python-pip
+pip install pycoin==0.80
+
+・pycoinの使い方を知る
+https://pycoin.readthedocs.io/en/stable/
+
+
+・pycoin利用開始
+vim index.py
+-------記載内容ここから------------
+#!/user/bin/env python
+# -*- coding: utf-8 -*-
+from bottle import route , run
+import pycoin
+
+@route('/')
+def page1():
+  return "Bottle Working"
+@route('/coin')
+def page2():
+  return pycoin.version
+run(host='150.95.177.213' , port=8080 , debug=True)
+-------記載内容ここまで----------
+
+
+・管理用PCの用意　※鍵管理、売り上げ回収用
+　※上記のWebサーバとは別の管理用装置を用意します。
+　　セキュリティ対策がされていて、普段インターネットに接続しないPCが望ましいです。
+　　管理用PCにPythonをインストール
+　　管理用PCにpipをインストール
+　　https://www.shellhacks.com/python-install-pip-mac-ubuntu-centos/
+　　管理用PCにpycoinをインストール
+　　pip install pycoin==0.80
+
+・管理用PCで管理用の拡張秘密鍵を作成(★)
+python
+from pycoin.serialize import h2b
+import pycoin.key.BIP32Node
+key_btc =  key_btc =pycoin.key.BIP32Node.BIP32Node.from_master_secret(h2b("0123456789abcdefffffffffffffff"))
+key_btctest = pycoin.key.BIP32Node.BIP32Node.from_master_secret(h2b("0123456789abcdefffffffffffffff") , netcode="XTN")
+key_doge = pycoin.key.BIP32Node.BIP32Node.from_master_secret(h2b("0123456789abcdefffffffffffffff"),netcode="DOGE")
+【ポイント】
+h2bの後ろの文字列を基に秘密鍵が出来ます。文字列は0からfまでの16進数を書くことができます。
+文字の数は偶数である必要があります。上記の文字列は推測しやすいので、もっと複雑な文字列にすると良いでしょう。
+また、netcode=の後ろに、利用したいコインを入力すると、そのコイン用の鍵を作成できます。
+XTNというのはTestnet用のBitcoinのことです。DOGEは日本で一番有名な犬をテーマにしたコインです。
+【豆知識】pycoinが対応している仮想通貨
+BTC,XTN,LTC,XLT,VIA,TVI,FTC,FTX,DOGE,XDT,BC,DASH,tDASH,MEC,MYR,UNO,JBS,MZC,RIC,DFC,FAI,ARG,ZEC,BTCD,DCR,DCRT
+
+
+・鍵を操作してみる(python)
+key_btctest [Enter]
+　⇒秘密鍵オブジェクトの存在を確認できます。
+key_btctest.public_copy() [Enter]
+　⇒秘密鍵から公開鍵を作成できます。
+key_btctest.subkey(10) [Enter]
+　⇒秘密鍵の10番目の子を作成できます。
+key_btctest.subkey(10).public_copy() [Enter]
+　⇒秘密鍵の10番目の子に対応した公開鍵を作成できます。
+　　ショップの商品1つにつき1つの公開鍵を対応づけると支払いの判別がやりやすい。
+key_btctest.subkey(10).public_copy().address() [Enter]
+　⇒支払い用アドレスも作成できます。
+
+
+・公開鍵を取得し、Webサーバにコピーします。
+管理PCで入力
+key_btctest.public_copy()
+<tpubD6NzVbkrYhZ4Y4xSHQ9PBHeDmCyWHuVNrpcAdMzsJQ8PFqhoAEkzrmJ2YBZ2dY4DhxdsLL3SPGvnSj2zvRhC7viJnJ2WyyMTnvLB9XHe6yp>
+
+Webサーバで入力
+import pycoin.key.BIP32Node
+pubkey_btctest = pycoin.key.BIP32Node.BIP32Node.from_wallet_key("tpubD6NzVbkrYhZ4Y4xSHQ9PBHeDmCyWHuVNrpcAdMzsJQ8PFqhoAEkzrmJ2YBZ2dY4DhxdsLL3SPGvnSj2zvRhC7viJnJ2WyyMTnvLB9XHe6yp")
+
+
+・商品番号に対応した支払い用アドレスをWebサイトに登録
+vim index.py
+-------記載内容ここから------------
+#!/user/bin/env python
+# -*- coding: utf-8 -*-
+from bottle import route , run
+import pycoin
+import pycoin.key.BIP32Node
+
+pubkey_btctest = pycoin.key.BIP32Node.BIP32Node.from_wallet_key("tpubD6NzVbkrYhZ4Y4xSHQ9PBHeDmCyWHuVNrpcAdMzsJQ8PFqhoAEkzrmJ2YBZ2dY4DhxdsLL3SPGvnSj2zvRhC7viJnJ2WyyMTnvLB9XHe6yp")
+
+address1_btctest = pubkey_btctest.subkey(1).address()
+address2_btctest = pubkey_btctest.subkey(2).address()
+address3_btctest = pubkey_btctest.subkey(3).address()
+
+
+@route('/')
+def page1():
+  return """Bottle Working</br>
+商品1　あ　支払アドレス：{0}</br>
+商品2　い　支払アドレス：{1}</br>
+商品3　う　支払アドレス：{2}</br>
+""".format(address1_btctest,address2_btctest,address3_btctest)
+
+run(host='150.95.177.213' , port=8080 , debug=True)
+-------記載内容ここまで----------
+
+・webブラウザでアクセス
+http://150.95.177.213:8080/
+[出力]
+Bottle Working
+商品1　あ　支払アドレス：miUgkKHFB4C6JcBqnbKqnJc5b3pLEDDL9p
+商品2　い　支払アドレス：mrEM9oMoJrFHz7HpdsccqEwZcjFzeKbAw3
+商品3　う　支払アドレス：mwGMuAAckJ7vEBT9Cr1P85YGAJ9DKc6uGp
+
+⇒ショッピングサイトのようなものができました。
+
+
+
+・作りこみ
+心の声を聴きながら作りこみます。
+私の場合は下記のようになりました。
+https://github.com/nandemotoken/CryptoShop/blob/master/index.py
+
+
+
+
+・売り上げ回収するためのプログラム
+------------ここから--------------
+pip install requests
+python
+import requests
+from pycoin.serialize import h2b
+import pycoin.key.BIP32Node
+import json
+from pycoin.tx.Tx import Tx
+from pycoin.tx.tx_utils import sign_tx
+from pycoin.tx.tx_utils import create_tx
+
+#　　※管理用PCで『管理用の拡張秘密鍵を作成(★)』で決めた文字列↓
+d = pycoin.key.BIP32Node.BIP32Node.from_master_secret(h2b("aaaaaaaa"), netcode='DOGE')
+#　　※自身のコインアドレス↓
+send_to_address = "DNBLH28hqsWTrVuEQHRSUqCyinnU1tQscM"
+
+#　　　　　　　　　　　　　　　↓商品番号
+doge_shop_address13 = d.subkey(13).address()
+resp6 = requests.get('https://chain.so/api/v2/get_tx_unspent/DOGE/'+doge_shop_address13)
+resp6_tx = requests.get('https://chain.so/api/v2/tx/DOGE/' + json.loads(resp6.text)["data"]["txs"][0]["txid"] )
+def check_my_tx(resp_tx):
+    for i ,  o in enumerate(json.loads(resp_tx.text)["data"]["outputs"]):
+        if o["address"] == doge_shop_address13:
+            return i
+tx6 = Tx.from_hex(json.loads(resp6_tx.text)["data"]["tx_hex"])
+spendable6 = tx6.tx_outs_as_spendable()[check_my_tx(resp6_tx)]
+tx6 = create_tx([spendable6] , [send_to_address] )
+sign_tx(tx6 , wifs=[d.subkey(13).wif()],netcode="DOGE")
+pos6 = requests.post("https://chain.so/api/v2/send_tx/DOGE", { 'tx_hex':tx6.as_hex() } )
+------------ここまで--------------
+
+
+

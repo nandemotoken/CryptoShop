@@ -41,8 +41,8 @@ if is_ok != "y":
 
 
 chain_so_get_tex_unspent_dic = {
-        "XTN":"https://chain.so/api/v2/get_tx_unspent/BTCTEST/" ,
-        "DOGE":"https://chain.so/api/v2/get_tx_unspent/DOGE/" ,
+        "XTN":"https://chain.so/api/v2/get_tx_unspent/BTCTEST/" , 
+        "DOGE":"https://chain.so/api/v2/get_tx_unspent/DOGE/" , 
         "DASH":"https://chain.so/api/v2/get_tx_unspent/DASH/"
         }
 
@@ -84,3 +84,7 @@ tx = create_tx([spendable] , [send_to_address] )
 sign_tx(tx , wifs=[private_key_master.subkey(item_number).wif()] , netcode=my_netcode)
 
 pos = requests.post(chain_so_send_tx , { 'tx_hex':tx.as_hex() } )
+
+
+
+

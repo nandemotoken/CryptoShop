@@ -175,10 +175,11 @@ https://github.com/nandemotoken/CryptoShop/blob/master/index.py
 
 
 
-・売り上げ回収するためのプログラム
-------------ここから--------------
+・売り上げ回収するためのプログラムの例 (githubには他コインでも利用できるものを公開しています)
+　　　　　　　　　　　　　　　　　　　⇒https://github.com/nandemotoken/CryptoShop/blob/master/shop_manage.py
 pip install requests
 python
+------------ここから--------------
 import requests
 from pycoin.serialize import h2b
 import pycoin.key.BIP32Node

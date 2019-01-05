@@ -15,6 +15,8 @@ def index():
 </br>　<a href="/data/XTN/1">商品1</a>
 </br>　<a href="/data/XTN/2">商品2</a>
 </br>　<a href="/data/XTN/3">商品3</a>
+</br>　<a href="/data/XTN/4">商品4</a>
+</br>　<a href="/data/XTN/5">商品5</a>
 </br>
 </br>[DOGE shop]
 </br>　<a href="/data/DOGE/11">商品11</a>
@@ -119,6 +121,13 @@ def cancel(currency , filename):
 
     html = """キャンセルしました。</br><a href="/">TOPに戻る</a>"""
     return html
+
+
+@route('/favicon.ico')
+def send_favicon():
+    return static_file("favicon.ico" , root=('/root/CriptoShop/data/') , mimetype='image/x-icon')
+
+
 
 
 run(host='150.95.149.179' , port=8080 , debug=True)
